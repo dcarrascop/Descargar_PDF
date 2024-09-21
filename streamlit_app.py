@@ -78,7 +78,7 @@ if uploaded_file:
 
             # Mostrar automáticamente el botón de descarga cuando se complete el ZIP
             st.download_button(
-                label="Descargar archivo ZIP automáticamente",
+                label="Descargar archivo ZIP",
                 data=zip_file,
                 file_name="articulos.zip",
                 mime="application/zip"
