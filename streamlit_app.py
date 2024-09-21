@@ -52,7 +52,7 @@ st.title("Descarga de artículos en PDF desde CSV")
 uploaded_file = st.file_uploader("Sube tu archivo CSV", type=["csv"])
 
 # Configuración de timeout
-timeout = st.number_input("Define el tiempo de timeout en segundos para cada artículo", min_value=1, max_value=180, value=60)
+timeout = st.number_input("Define el tiempo de máximo de espera en segundos para cada artículo", min_value=1, max_value=180, value=60)
 
 if uploaded_file:
     # Leer el archivo CSV
@@ -71,11 +71,14 @@ if uploaded_file:
         # Ajustar el rango al índice 0 basado en Python
         articulos_seleccionados = df[['title', 'url']].iloc[start_index-1:end_index].values.tolist()
 
-        # Botón para descargar
+        # Botón para iniciar la descarga y generar el ZIP automáticamente
         if st.button(f"Descargar artículos {start_index} a {end_index} como ZIP"):
+            # Generar el archivo ZIP
             zip_file = descargar_articulos(articulos_seleccionados, timeout)
+
+            # Mostrar automáticamente el botón de descarga cuando se complete el ZIP
             st.download_button(
-                label="Descargar archivo ZIP",
+                label="Descargar archivo ZIP automáticamente",
                 data=zip_file,
                 file_name="articulos.zip",
                 mime="application/zip"
