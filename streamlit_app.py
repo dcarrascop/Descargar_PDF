@@ -18,7 +18,10 @@ def descargar_articulos(articulos, timeout):
 
         for i, (titulo, url) in enumerate(articulos):
             try:
-                st.write(f"Procesando {i+1}/{total_articulos}: {titulo} ({int((i+1)/total_articulos*100)}%)")
+                # Mostrar el progreso en el formato requerido
+                st.write(f"Procesando {i+1}/{total_articulos} ({int((i+1)/total_articulos*100)}%): {titulo}")
+                
+                # Descargar la página del artículo
                 response = requests.get(url, timeout=timeout)  # Aplicar el timeout
                 soup = BeautifulSoup(response.text, 'html.parser')
                 pdf_meta = soup.find('meta', attrs={'name': 'citation_pdf_url'})
