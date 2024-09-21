@@ -18,7 +18,7 @@ def descargar_articulos(articulos, timeout):
 
         for i, (titulo, url) in enumerate(articulos):
             try:
-                st.write(f"Procesando {i+1}: {titulo}")
+                st.write(f"Procesando {i+1}/{total_articulos}: {titulo} ({int((i+1)/total_articulos*100)}%)")
                 response = requests.get(url, timeout=timeout)  # Aplicar el timeout
                 soup = BeautifulSoup(response.text, 'html.parser')
                 pdf_meta = soup.find('meta', attrs={'name': 'citation_pdf_url'})
@@ -39,7 +39,7 @@ def descargar_articulos(articulos, timeout):
             except requests.exceptions.RequestException as e:
                 log_errores.append(f"Error al descargar {titulo}, URL: {url} - {str(e)}")
 
-            # Actualizar la barra de progreso
+            # Actualizar la barra de progreso y mostrar el porcentaje
             progress_bar.progress((i + 1) / total_articulos)
 
         # Crear el archivo de log y añadirlo al zip
@@ -58,7 +58,7 @@ st.title("Descarga de artículos en PDF desde CSV")
 uploaded_file = st.file_uploader("Sube tu archivo CSV", type=["csv"])
 
 # Configuración de timeout
-timeout = st.number_input("Define el tiempo de timeout en segundos para cada artículo", min_value=1, max_value=180, value=60)
+timeout = st.number_input("Define el tiempo de espera en segundos para cada artículo", min_value=1, max_value=180, value=60)
 
 # Variable de estado para almacenar el archivo ZIP
 if 'zip_file' not in st.session_state:
