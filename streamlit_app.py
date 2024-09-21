@@ -6,8 +6,8 @@ import io
 import re
 import pandas as pd
 
-# Función para descargar y procesar PDFs
-def descargar_articulos(articulos):
+# Función para descargar y procesar PDFs con timeout
+def descargar_articulos(articulos, timeout):
     zip_buffer = io.BytesIO()
     log_errores = []  # Lista para guardar los errores
 
@@ -16,13 +16,13 @@ def descargar_articulos(articulos):
         for i, (titulo, url) in enumerate(articulos):
             try:
                 st.write(f"Procesando {i+1}: {titulo}")
-                response = requests.get(url)
+                response = requests.get(url, timeout=timeout)  # Aplicar el timeout
                 soup = BeautifulSoup(response.text, 'html.parser')
                 pdf_meta = soup.find('meta', attrs={'name': 'citation_pdf_url'})
 
                 if pdf_meta:
                     pdf_url = pdf_meta['content']
-                    pdf_response = requests.get(pdf_url)
+                    pdf_response = requests.get(pdf_url, timeout=timeout)  # Aplicar el timeout en la descarga del PDF
                     
                     # Limpiar el nombre del archivo
                     title_clean = re.sub(r'[^\w\s-]', '', titulo).replace(' ', '_')
@@ -51,6 +51,9 @@ st.title("Descarga de artículos en PDF desde CSV")
 # Subir el archivo CSV
 uploaded_file = st.file_uploader("Sube tu archivo CSV", type=["csv"])
 
+# Configuración de timeout
+timeout = st.number_input("Define el tiempo de timeout en segundos para cada artículo", min_value=1, max_value=60, value=10)
+
 if uploaded_file:
     # Leer el archivo CSV
     df = pd.read_csv(uploaded_file)
@@ -62,7 +65,7 @@ if uploaded_file:
 
         # Botón para descargar
         if st.button("Descargar PDFs como ZIP"):
-            zip_file = descargar_articulos(articulos)
+            zip_file = descargar_articulos(articulos, timeout)
             st.download_button(
                 label="Descargar archivo ZIP",
                 data=zip_file,
