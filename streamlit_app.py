@@ -38,11 +38,11 @@ def descargar_articulos(articulos, timeout):
                     st.write(f"PDF de {titulo} descargado.")
                 else:
                     log_errores.append(f"PDF no encontrado para el artículo: {titulo}, URL: {url}")
-                    st.error(f"Error: PDF no encontrado para el artículo: {titulo}")
+                    st.warning(f"Artículo no descargado: {titulo}")  # Cambiar el mensaje al formato deseado
 
             except requests.exceptions.RequestException as e:
                 log_errores.append(f"Error al descargar {titulo}, URL: {url} - {str(e)}")
-                st.error(f"Error al descargar {titulo}, URL: {url} - {str(e)}")
+                st.warning(f"Artículo no descargado: {titulo}")  # Mostrar el mensaje más simple para errores
 
             # Actualizar la barra de progreso y mostrar el porcentaje
             progress_bar.progress((i + 1) / total_articulos)
