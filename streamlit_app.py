@@ -60,7 +60,7 @@ if uploaded_file is not None:
                         st.write(f"Enlace al PDF encontrado: {pdf_url}")
 
                         # Descargar el PDF en memoria
-                        pdf_response = requests.get(pdf_url, timeout=20)
+                        pdf_response = requests.get(pdf_url, timeout=180)
                         pdf_data = pdf_response.content
 
                         # Crear un nombre temporal para el archivo
