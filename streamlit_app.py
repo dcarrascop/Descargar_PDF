@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import zipfile
 import io
 import re
+import pandas as pd
 
 # Función para descargar y procesar PDFs
 def descargar_articulos(articulos):
@@ -44,22 +45,29 @@ def descargar_articulos(articulos):
     zip_buffer.seek(0)
     return zip_buffer
 
-# Definir los artículos de prueba
-articulos_prueba = [
-    ("Artículo 1", "http://www.scielo.org.mx/scielo.php?script=sci_arttext&pid=S2448-878X2024000200279&lang=es"),
-    ("Artículo 2", "http://www.scielo.org.mx/scielo.php?script=sci_arttext&pid=S2448-878X2024000200041&lang=es"),
-    # Agrega más artículos según sea necesario
-]
-
 # Interfaz de Streamlit
-st.title("Descarga de artículos en PDF")
+st.title("Descarga de artículos en PDF desde CSV")
 
-# Botón para descargar
-if st.button("Descargar PDFs como ZIP"):
-    zip_file = descargar_articulos(articulos_prueba)
-    st.download_button(
-        label="Descargar archivo ZIP",
-        data=zip_file,
-        file_name="articulos.zip",
-        mime="application/zip"
-    )
+# Subir el archivo CSV
+uploaded_file = st.file_uploader("Sube tu archivo CSV", type=["csv"])
+
+if uploaded_file:
+    # Leer el archivo CSV
+    df = pd.read_csv(uploaded_file)
+
+    # Asegúrate de que las columnas 'title' y 'url' existen en tu CSV
+    if 'title' in df.columns and 'url' in df.columns:
+        # Extraer los títulos y URLs
+        articulos = df[['title', 'url']].values.tolist()
+
+        # Botón para descargar
+        if st.button("Descargar PDFs como ZIP"):
+            zip_file = descargar_articulos(articulos)
+            st.download_button(
+                label="Descargar archivo ZIP",
+                data=zip_file,
+                file_name="articulos.zip",
+                mime="application/zip"
+            )
+    else:
+        st.error("El archivo CSV debe contener las columnas 'title' y 'url'.")
