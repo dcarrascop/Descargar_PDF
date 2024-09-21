@@ -50,7 +50,7 @@ def descargar_articulos(articulos, timeout):
         # Crear el archivo de log y añadirlo al zip
         if log_errores:
             log_content = "\n".join(log_errores)
-            zf.writestr("log_errores.txt", log_content)
+            zf.writestr("00_log_errores.txt", log_content)
             st.write("Log de errores creado y añadido al zip.")
 
     zip_buffer.seek(0)
