@@ -13,6 +13,9 @@ def descargar_articulos(articulos, timeout):
 
     # Crear un archivo zip
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+        progress_bar = st.progress(0)
+        total_articulos = len(articulos)
+
         for i, (titulo, url) in enumerate(articulos):
             try:
                 st.write(f"Procesando {i+1}: {titulo}")
@@ -36,6 +39,9 @@ def descargar_articulos(articulos, timeout):
             except requests.exceptions.RequestException as e:
                 log_errores.append(f"Error al descargar {titulo}, URL: {url} - {str(e)}")
 
+            # Actualizar la barra de progreso
+            progress_bar.progress((i + 1) / total_articulos)
+
         # Crear el archivo de log y añadirlo al zip
         if log_errores:
             log_content = "\n".join(log_errores)
@@ -52,7 +58,11 @@ st.title("Descarga de artículos en PDF desde CSV")
 uploaded_file = st.file_uploader("Sube tu archivo CSV", type=["csv"])
 
 # Configuración de timeout
-timeout = st.number_input("Define el tiempo de máximo de espera en segundos para cada artículo", min_value=1, max_value=180, value=60)
+timeout = st.number_input("Define el tiempo de timeout en segundos para cada artículo", min_value=1, max_value=180, value=60)
+
+# Variable de estado para almacenar el archivo ZIP
+if 'zip_file' not in st.session_state:
+    st.session_state.zip_file = None
 
 if uploaded_file:
     # Leer el archivo CSV
@@ -71,17 +81,19 @@ if uploaded_file:
         # Ajustar el rango al índice 0 basado en Python
         articulos_seleccionados = df[['title', 'url']].iloc[start_index-1:end_index].values.tolist()
 
-        # Botón para iniciar la descarga y generar el ZIP automáticamente
+        # Botón para iniciar la descarga
         if st.button(f"Descargar artículos {start_index} a {end_index} como ZIP"):
             # Generar el archivo ZIP
-            zip_file = descargar_articulos(articulos_seleccionados, timeout)
+            st.session_state.zip_file = descargar_articulos(articulos_seleccionados, timeout)
 
-            # Mostrar automáticamente el botón de descarga cuando se complete el ZIP
-            st.download_button(
-                label="Descargar archivo ZIP",
-                data=zip_file,
-                file_name="articulos.zip",
-                mime="application/zip"
-            )
     else:
         st.error("El archivo CSV debe contener las columnas 'title' y 'url'.")
+
+# Si el archivo ZIP ya fue generado, mostrar el botón de descarga
+if st.session_state.zip_file:
+    st.download_button(
+        label="Descargar archivo ZIP",
+        data=st.session_state.zip_file,
+        file_name="articulos.zip",
+        mime="application/zip"
+    )
