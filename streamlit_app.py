@@ -52,20 +52,28 @@ st.title("Descarga de artículos en PDF desde CSV")
 uploaded_file = st.file_uploader("Sube tu archivo CSV", type=["csv"])
 
 # Configuración de timeout
-timeout = st.number_input("Define el tiempo de timeout en segundos para cada artículo", min_value=1, max_value=60, value=10)
+timeout = st.number_input("Define el tiempo de timeout en segundos para cada artículo", min_value=1, max_value=180, value=60)
 
 if uploaded_file:
     # Leer el archivo CSV
     df = pd.read_csv(uploaded_file)
 
-    # Asegúrate de que las columnas 'title' y 'url' existen en tu CSV
+    # Asegurarse de que las columnas 'title' y 'url' existen en tu CSV
     if 'title' in df.columns and 'url' in df.columns:
-        # Extraer los títulos y URLs
-        articulos = df[['title', 'url']].values.tolist()
+        # Contar la cantidad de artículos
+        total_articulos = len(df)
+        st.write(f"Total de artículos: {total_articulos}")
+
+        # Selección de rango de artículos
+        start_index = st.number_input("Selecciona el índice de inicio (1 a N)", min_value=1, max_value=total_articulos, value=1)
+        end_index = st.number_input("Selecciona el índice de fin (1 a N)", min_value=1, max_value=total_articulos, value=total_articulos)
+
+        # Ajustar el rango al índice 0 basado en Python
+        articulos_seleccionados = df[['title', 'url']].iloc[start_index-1:end_index].values.tolist()
 
         # Botón para descargar
-        if st.button("Descargar PDFs como ZIP"):
-            zip_file = descargar_articulos(articulos, timeout)
+        if st.button(f"Descargar artículos {start_index} a {end_index} como ZIP"):
+            zip_file = descargar_articulos(articulos_seleccionados, timeout)
             st.download_button(
                 label="Descargar archivo ZIP",
                 data=zip_file,
